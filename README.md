@@ -6,12 +6,12 @@ Feed Rember text, files, images, or videos — ask it anything about what you've
 
 ## Features
 
-- 📥 **Multi-format ingestion**: Text, files (`.txt`, `.md`, `.json`, `.csv`), images & videos (Phase 2)
-- 🧠 **LLM-powered extraction**: Extracts structured facts and summaries from raw content
+- 📥 **Multi-format ingestion**: Text, files (`.txt`, `.md`, `.json`, `.csv`), images (`.jpg`, `.png`), & videos (`.mp4`)
+- 🧠 **LLM-powered extraction**: Extracts structured facts and summaries from raw content, with multimodal vision support
 - 🔍 **Semantic search**: FAISS-powered vector similarity search with re-ranking
 - 🤖 **Provider-agnostic**: Swap LLM and embedding providers via config (Gemini default)
-- 🗄️ **Persistent storage**: FAISS index + SQLite metadata, all local in `~/.rember/`
-- 🔧 **Per-task routing**: Different LLMs for extraction, summarization, and query answering
+- 🗄️ **Persistent storage**: FAISS index + SQLite metadata, local in `~/.rember/`
+- ⚙️ **Media fallback processing**: Local video frame extraction + optional Whisper audio transcription
 
 ## Quick Start
 
@@ -20,8 +20,14 @@ Feed Rember text, files, images, or videos — ask it anything about what you've
 ```bash
 git clone https://github.com/yourname/rember
 cd rember
+# Requires system ffmpeg (for video/audio processing)
+sudo apt install ffmpeg  # or brew install ffmpeg
+
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
+
+# (Optional) For fallback local audio transcription:
+pip install -e ".[whisper]"
 ```
 
 ### 2. Configure
@@ -47,8 +53,14 @@ rember init
 # Ingest raw text
 rember ingest --text "Python was created by Guido van Rossum in 1991."
 
-# Ingest a file
+# Ingest a text file
 rember ingest ./notes.txt --tag project=python --tag source=notes
+
+# Ingest an image (uses Gemini multimodal vision)
+rember ingest ./diagram.png --tag type=architecture
+
+# Ingest a video (uses Gemini Files API natively, or fallback frames + Whisper)
+rember ingest ./demo.mp4 --tag event=q3-review
 
 # Ask a question
 rember query "Who created Python?"
@@ -63,11 +75,12 @@ rember stats
 ## Architecture
 
 ```
-Input (text/file)
+Input (text / image / video)
     ↓
-IngestStage       → reads content, creates Document
+IngestStage       → reads text/metadata, creates Document
     ↓
-ExtractStage      → LLM extracts key facts + summary
+ExtractStage      → Multimodal LLM extraction (Gemini Vision / Video API)
+                    ↳ Fallback: Video frames + Whisper transcription → Text LLM
     ↓
 ChunkStage        → adaptive chunking (short → whole, long → split)
     ↓
@@ -111,6 +124,6 @@ ruff check src/ tests/
 
 ## Roadmap
 
-- **Phase 1** (current): Text ingestion, Gemini LLM/embeddings, FAISS+SQLite, CLI
-- **Phase 2**: Image and video ingestion (Gemini vision + frame extraction)
-- **Phase 3**: Re-ranking, query expansion, multi-provider routing UI
+- ✅ **Phase 1**: Text ingestion, Gemini LLM/embeddings, FAISS+SQLite, CLI
+- ✅ **Phase 2**: Image and video ingestion (Gemini native vision/video + frame/audio fallback)
+- 🚧 **Phase 3**: Re-ranking, query expansion, multi-provider routing UI
