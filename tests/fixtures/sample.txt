@@ -1,0 +1,15 @@
+Python is a high-level, general-purpose programming language created by Guido van Rossum.
+It was first released in 1991 and emphasizes code readability and simplicity.
+
+Python supports multiple programming paradigms including procedural, object-oriented,
+and functional programming. It has a large standard library and a vibrant ecosystem
+of third-party packages available via PyPI.
+
+Common uses of Python include:
+- Web development (Django, FastAPI, Flask)
+- Data science and machine learning (NumPy, Pandas, PyTorch, TensorFlow)
+- Scripting and automation
+- Scientific computing
+
+Python uses indentation to define code blocks, which enforces a consistent coding style.
+The Python Software Foundation (PSF) manages the language's development and licensing.

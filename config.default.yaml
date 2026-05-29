@@ -1,0 +1,69 @@
+# Rember Pipeline — Default Configuration
+# Copy to config.yaml and customize. Secrets go in .env
+
+pipeline:
+  default_llm: gemini
+  default_embedding: gemini
+
+llm:
+  gemini:
+    model: gemini-2.0-flash
+    temperature: 0.3
+    max_output_tokens: 2048
+
+  # Example: Add other providers here in the future
+  # openai:
+  #   model: gpt-4o
+  #   temperature: 0.3
+  #   max_output_tokens: 2048
+
+# Per-task LLM routing (maps task name -> provider name)
+# Omit a task to use the default_llm
+task_routing:
+  extraction: gemini
+  summarization: gemini
+  query_answering: gemini
+
+embeddings:
+  gemini:
+    model: gemini-embedding-001
+    task_type: RETRIEVAL_DOCUMENT
+    # dimension: 3072  # Uncomment to override default (3072 for gemini-embedding-001)
+
+  # Example: local sentence-transformers (Phase 2+)
+  # local:
+  #   model: all-MiniLM-L6-v2
+  #   dimension: 384
+
+storage:
+  data_dir: ~/.rember
+  vector:
+    index_type: flat_ip  # Options: flat_ip, hnsw
+    normalize: true
+  metadata:
+    db_name: rember.db
+
+chunking:
+  adaptive_threshold: 500   # tokens: content shorter than this stored whole
+  max_chunk_size: 1000       # tokens: max size of a single chunk
+  chunk_overlap: 100         # tokens: overlap between adjacent chunks
+
+media:
+  # Image processing
+  max_image_size_mb: 20.0       # resize images larger than this before sending to API
+  image_max_dimension: 2048     # max width/height after resize
+  image_quality: 85             # JPEG compression quality (1-95)
+  # Video processing
+  max_video_size_mb: 100.0      # max video file size to process
+  max_video_duration_seconds: 600  # 10 minutes
+  num_frames_to_extract: 10     # frames to extract in fallback mode
+  video_upload_timeout_seconds: 300  # Gemini Files API processing timeout
+  # Fallback audio transcription (requires: pip install openai-whisper)
+  whisper_model: base           # tiny | base | small | medium | large
+  enable_transcription: true    # whether to transcribe audio in fallback
+  # Strategy
+  prefer_native_video: true     # try Gemini native video understanding first
+
+query:
+  top_k: 10           # number of results to retrieve
+  min_score: 0.3      # minimum similarity score (0.0-1.0)
